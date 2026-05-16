@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Variáveis — Dra. Caroline</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f0f11;--surface:#1a1a1e;--surface2:#222228;--border:#2e2e36;
+    --accent:#c8a98a;--accent2:#e8c9a8;--danger:#e07070;--success:#7ec8a0;
+    --warning:#e0b870;--info:#a0a0e0;--text:#f0ede8;--text3:#6a6572;
+    --r:14px;--rs:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px;}
+
+  .header{padding:20px 20px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:space-between;}
+  .header h1{font-family:'DM Serif Display',serif;font-size:22px;color:var(--accent2);}
+  .header p{font-size:11px;color:var(--text3);margin-top:2px;}
+  .month-nav{display:flex;align-items:center;gap:10px;}
+  .month-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .month-label{font-size:13px;font-weight:600;color:var(--accent);min-width:80px;text-align:center;}
+
+  /* RESUMO GERAL */
+  .summary{padding:14px 20px;border-bottom:1px solid var(--border);}
+  .summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .summary-label{font-size:12px;color:var(--text3);}
+  .summary-val{font-family:'DM Serif Display',serif;font-size:18px;}
+  .progress-bar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:4px;}
+  .progress-fill{height:100%;border-radius:4px;transition:width .3s;}
+
+  .content{padding:14px 20px;}
+
+  /* CATEGORIA */
+  .cat-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+  .cat-card.danger{border-left:3px solid var(--danger);}
+  .cat-card.warning{border-left:3px solid var(--warning);}
+  .cat-card.ok{border-left:3px solid var(--success);}
+  .cat-header{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;}
+  .cat-icon{font-size:20px;flex-shrink:0;}
+  .cat-info{flex:1;}
+  .cat-name{font-size:14px;font-weight:600;}
+  .cat-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+  .cat-vals{text-align:right;flex-shrink:0;}
+  .cat-spent{font-family:'DM Serif Display',serif;font-size:18px;}
+  .cat-teto{font-size:10px;color:var(--text3);margin-top:1px;}
+  .cat-bar{height:5px;background:var(--surface2);margin:0 16px 12px;}
+  .cat-bar-fill{height:100%;border-radius:2px;transition:width .3s;}
+
+  /* LANÇAMENTOS */
+  .lancamentos{display:none;padding:0 16px 14px;}
+  .lancamentos.open{display:block;}
+  .lanc-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:13px;}
+  .lanc-left{flex:1;}
+  .lanc-desc{color:var(--text);}
+  .lanc-date{font-size:11px;color:var(--text3);margin-top:2px;}
+  .lanc-val{font-weight:600;color:var(--danger);flex-shrink:0;}
+  .lanc-del{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 0 0 8px;}
+
+  .add-btn{width:100%;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);color:var(--accent);font-family:inherit;font-size:13px;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;}
+
+  /* MODAL */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(4px);}
+  .overlay.open{display:flex;}
+  .modal{background:var(--surface);border-radius:var(--r) var(--r) 0 0;border:1px solid var(--border);border-bottom:none;width:100%;padding:22px 20px 44px;animation:up .3s ease;}
+  @keyframes up{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--accent2);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
+  .modal-close{background:var(--surface2);border:none;color:var(--text3);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+  .field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:inherit;font-size:15px;padding:11px 13px;outline:none;-webkit-appearance:none;}
+  .field input:focus,.field select:focus{border-color:var(--accent);}
+  .field select option{background:var(--surface2);}
+  .btn-save{width:100%;padding:15px;background:var(--accent);color:#1a1208;font-family:inherit;font-size:15px;font-weight:600;border:none;border-radius:var(--r);cursor:pointer;margin-top:6px;}
+
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:30px;font-size:13px;z-index:500;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  .fab{position:fixed;bottom:24px;right:20px;width:58px;height:58px;border-radius:50%;background:var(--accent);color:#1a1208;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(200,169,138,.4);display:flex;align-items:center;justify-content:center;z-index:200;}
+  .fab:active{transform:scale(.93);}
+
+  .alerta{background:rgba(224,112,112,.08);border:1px solid rgba(224,112,112,.2);border-radius:var(--rs);padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--danger);display:none;}
+  .alerta.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><h1>Variáveis</h1><p>Dra. Caroline Lima</p></div>
+  <div class="month-nav">
+    <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+    <span class="month-label" id="monthLabel"></span>
+    <button class="month-btn" onclick="changeMonth(1)">›</button>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="summary-row">
+    <span class="summary-label">Gasto total do mês</span>
+    <span class="summary-val" id="totalGasto" style="color:var(--danger)">R$ 0</span>
+  </div>
+  <div class="summary-row">
+    <span class="summary-label">Teto mensal</span>
+    <span class="summary-val" id="totalTeto" style="color:var(--text3)">R$ 0</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="totalBar" style="background:var(--success);width:0%"></div>
+  </div>
+  <div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:right" id="totalSobra"></div>
+</div>
+
+<div class="content" id="content"></div>
+
+<button class="fab" onclick="openModal()">+</button>
+
+<div class="overlay" id="overlay" onclick="closeOut(event)">
+  <div class="modal">
+    <div class="modal-title"><span>Novo gasto</span><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="field"><label>Categoria</label>
+      <select id="fCat"></select>
+    </div>
+    <div class="field"><label>Descrição</label>
+      <input type="text" id="fDesc" placeholder="Ex: iFood jantar, Uber Ipanema...">
+    </div>
+    <div class="field"><label>Valor (R$)</label>
+      <input type="number" id="fVal" placeholder="0,00" step="0.01">
+    </div>
+    <div class="field"><label>Data</label>
+      <input type="date" id="fData">
+    </div>
+    <button class="btn-save" onclick="saveGasto()">Salvar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'caroline_variaveis_v1';
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+const CATEGORIAS = [
+  { id: 'ifood',    nome: 'iFood / Restaurantes', icon: '🍔', teto: 400 },
+  { id: 'mercado',  nome: 'Mercado',               icon: '🛒', teto: 600 },
+  { id: 'uber',     nome: 'Uber / Transporte',     icon: '🚗', teto: 800 },
+  { id: 'farmacia', nome: 'Farmácia',              icon: '💊', teto: 400 },
+  { id: 'gatos',    nome: 'Gatos',                 icon: '🐱', teto: 700 },
+  { id: 'beleza',   nome: 'Beleza / Cosméticos',   icon: '✨', teto: 300 },
+  { id: 'outros',   nome: 'Outros / Casa',         icon: '🏠', teto: 500 },
+];
+
+let data = {};
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+function monthKey() { return `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`; }
+function load() { try { data = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e) { data = {}; } }
+function persist() { localStorage.setItem(KEY, JSON.stringify(data)); }
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmt(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0}); }
+function fmtDate(d) { if(!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}`; }
+
+function getGastos(catId) {
+  const mk = monthKey();
+  return (data[mk] || []).filter(g => g.cat === catId);
+}
+
+function getTotalCat(catId) {
+  return getGastos(catId).reduce((s, g) => s + Number(g.val), 0);
+}
+
+function getTotalGeral() {
+  return CATEGORIAS.reduce((s, c) => s + getTotalCat(c.id), 0);
+}
+
+function getTeto() {
+  return CATEGORIAS.reduce((s, c) => s + c.teto, 0);
+}
+
+function pct(gasto, teto) {
+  return Math.min(100, Math.round((gasto / teto) * 100));
+}
+
+function barColor(p) {
+  if (p >= 90) return 'var(--danger)';
+  if (p >= 70) return 'var(--warning)';
+  return 'var(--success)';
+}
+
+function cardClass(p) {
+  if (p >= 90) return 'danger';
+  if (p >= 70) return 'warning';
+  return 'ok';
+}
+
+function changeMonth(d) {
+  currentMonth += d;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  render();
+}
+
+function render() {
+  document.getElementById('monthLabel').textContent = MONTHS[currentMonth].substring(0,3) + ' ' + currentYear;
+
+  const totalGasto = getTotalGeral();
+  const totalTeto = getTeto();
+  const p = pct(totalGasto, totalTeto);
+  const sobra = totalTeto - totalGasto;
+
+  document.getElementById('totalGasto').textContent = fmt(totalGasto);
+  document.getElementById('totalTeto').textContent = fmt(totalTeto);
+  document.getElementById('totalBar').style.width = p + '%';
+  document.getElementById('totalBar').style.background = barColor(p);
+  document.getElementById('totalSobra').textContent = sobra >= 0
+    ? `Ainda disponível: ${fmt(sobra)}`
+    : `Estourou ${fmt(Math.abs(sobra))} acima do teto`;
+  document.getElementById('totalSobra').style.color = sobra >= 0 ? 'var(--success)' : 'var(--danger)';
+
+  const content = document.getElementById('content');
+
+  // Alerta 70%
+  const alertas = CATEGORIAS.filter(c => pct(getTotalCat(c.id), c.teto) >= 70);
+
+  let html = '';
+  if (alertas.length) {
+    html += `<div class="alerta show">⚠️ ${alertas.map(c => c.nome).join(', ')} — acima de 70% do teto</div>`;
+  }
+
+  html += CATEGORIAS.map(cat => {
+    const gasto = getTotalCat(cat.id);
+    const p = pct(gasto, cat.teto);
+    const cls = cardClass(p);
+    const gastos = getGastos(cat.id);
+
+    const itens = gastos.length
+      ? gastos.map((g, i) => `
+        <div class="lanc-item">
+          <div class="lanc-left">
+            <div class="lanc-desc">${g.desc || '—'}</div>
+            <div class="lanc-date">${fmtDate(g.data)}</div>
+          </div>
+          <span class="lanc-val">− ${fmt(g.val)}</span>
+          <button class="lanc-del" onclick="delGasto('${cat.id}',${i});event.stopPropagation()">×</button>
+        </div>`).join('')
+      : '<div style="font-size:13px;color:var(--text3);padding:8px 0;border-top:1px solid var(--border)">Nenhum lançamento</div>';
+
+    return `<div class="cat-card ${cls}">
+      <div class="cat-header" onclick="toggleLanc(this)">
+        <span class="cat-icon">${cat.icon}</span>
+        <div class="cat-info">
+          <div class="cat-name">${cat.nome}</div>
+          <div class="cat-sub">${p}% do teto · ${gastos.length} lançamento${gastos.length !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="cat-vals">
+          <div class="cat-spent" style="color:${barColor(p)}">${fmt(gasto)}</div>
+          <div class="cat-teto">teto ${fmt(cat.teto)}</div>
+        </div>
+      </div>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:${p}%;background:${barColor(p)}"></div></div>
+      <div class="lancamentos">
+        ${itens}
+        <button class="add-btn" onclick="openModal('${cat.id}');event.stopPropagation()">+ Adicionar lançamento</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  content.innerHTML = html;
+}
+
+function toggleLanc(header) {
+  const l = header.parentElement.querySelector('.lancamentos');
+  l.classList.toggle('open');
+}
+
+let modalCat = null;
+
+function openModal(catId) {
+  modalCat = catId || null;
+  const sel = document.getElementById('fCat');
+  sel.innerHTML = CATEGORIAS.map(c => `<option value="${c.id}" ${c.id === catId ? 'selected' : ''}>${c.icon} ${c.nome}</option>`).join('');
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fVal').value = '';
+  document.getElementById('fData').value = today();
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('fDesc').focus(), 350);
+}
+
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function closeOut(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+function saveGasto() {
+  const cat = document.getElementById('fCat').value;
+  const desc = document.getElementById('fDesc').value.trim();
+  const val = parseFloat(document.getElementById('fVal').value);
+  const dt = document.getElementById('fData').value;
+
+  if (!val || val <= 0) { toast('Informe o valor'); return; }
+
+  const mk = monthKey();
+  if (!data[mk]) data[mk] = [];
+  data[mk].push({ cat, desc, val, data: dt });
+  persist();
+  render();
+  closeModal();
+  toast('Salvo ✓');
+}
+
+function delGasto(catId, idx) {
+  if (!confirm('Remover este lançamento?')) return;
+  const mk = monthKey();
+  const gastos = (data[mk] || []).filter(g => g.cat === catId);
+  const item = gastos[idx];
+  data[mk] = data[mk].filter(g => g !== item);
+  persist();
+  render();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+load();
+render();
+</script>
+</body>
+</html>
